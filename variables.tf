@@ -43,7 +43,7 @@ variable "vm_size" {
 }
 
 variable "kubernetes_version" {
-  description = "The Kubernetes version to use for the AKS cluster."
+  description = "Optional override for the AKS cluster Kubernetes version. Set to null to use the latest supported (non-preview) version for the region."
   type        = string
-  default     = "1.28"
+  default     = null
 }

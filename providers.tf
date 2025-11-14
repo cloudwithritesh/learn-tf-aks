@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -16,8 +16,8 @@ terraform {
 provider "azurerm" {
   features {
     virtual_machine {
-      delete_os_disk_on_deletion            = true
-      skip_shutdown_and_force_delete        = false
+      delete_os_disk_on_deletion     = true
+      skip_shutdown_and_force_delete = false
     }
   }
 }
