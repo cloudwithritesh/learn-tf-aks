@@ -20,14 +20,14 @@ To follow this guide, you will need the following tools installed and configured
 
 We will use a simple, modular project structure to separate the infrastructure and workload definitions:
 
-\`\`\`bash
+```bash
 aks_terraform_guide/
 ├── providers.tf    # Provider configuration
 ├── main.tf         # Infrastructure (Resource Group, VNet, AKS)
 ├── variables.tf    # Input variables for customization
 ├── workload.tf     # Kubernetes Workload (Deployment, Service)
 └── outputs.tf      # (To be created) Outputs like the Load Balancer IP
-\`\`\`
+```
 
 ## III. Phase 1: Infrastructure Provisioning (AKS Cluster)
 
@@ -37,7 +37,7 @@ The first phase focuses on defining the core Azure resources using the `azurerm`
 
 The `main.tf` file begins by defining the required providers: `azurerm` for the cloud infrastructure and `kubernetes` for the application workload.
 
-\`\`\`terraform
+```terraform
 # main.tf
 
 # 1. Configure the Azure Provider
@@ -59,7 +59,7 @@ terraform {
 provider "azurerm" {
   features {}
 }
-\`\`\`
+```
 
 > **Best Practice: State Management**
 > For production environments, it is critical to configure a remote backend, such as an Azure Storage Account, to securely store the Terraform state file. This enables collaboration and prevents state corruption.
@@ -68,7 +68,7 @@ provider "azurerm" {
 
 We define the foundational resources: a Resource Group to contain all assets, and a Virtual Network (VNet) with a dedicated Subnet for the AKS nodes. Using a custom VNet is a best practice for production deployments, enabling advanced networking features like **Azure CNI** [1].
 
-\`\`\`terraform
+```terraform
 # main.tf (continued)
 
 # 2. Resource Group
@@ -95,13 +95,13 @@ resource "azurerm_subnet" "aks_subnet" {
   enforce_private_link_endpoint_network_policies = false
   enforce_private_link_service_network_policies  = false
 }
-\`\`\`
+```
 
 ### C. AKS Cluster Configuration
 
 The `azurerm_kubernetes_cluster` resource is the core of the infrastructure. We configure it to use a **System-Assigned Managed Identity** for secure interaction with other Azure services and specify the custom VNet subnet for the node pool.
 
-\`\`\`terraform
+```terraform
 # main.tf (continued)
 
 # 4. Azure Kubernetes Service (AKS) Cluster
@@ -145,13 +145,13 @@ resource "azurerm_role_assignment" "aks_vnet_contributor" {
   role_definition_name = "Contributor"
   principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
 }
-\`\`\`
+```
 
 ### D. Connecting the Kubernetes Provider
 
 To deploy the workload in the next phase, the `kubernetes` provider needs the cluster's credentials (kubeconfig). We use a `data` source to retrieve this information after the cluster is created and configure the `kubernetes` provider dynamically.
 
-\`\`\`terraform
+```terraform
 # main.tf (continued)
 
 # 6. Configure the Kubernetes Provider to use the AKS cluster credentials
@@ -167,7 +167,7 @@ provider "kubernetes" {
   client_key             = base64decode(data.azurerm_kubernetes_cluster.aks.kube_config.0.client_key)
   cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.aks.kube_config.0.cluster_ca_certificate)
 }
-\`\`\`
+```
 
 ## IV. Phase 2: Workload Deployment (Sample Application)
 
@@ -177,7 +177,7 @@ With the `kubernetes` provider configured, we can now define Kubernetes resource
 
 We define a simple Nginx deployment with two replicas.
 
-\`\`\`terraform
+```terraform
 # workload.tf
 
 # 1. Kubernetes Deployment for Nginx
@@ -214,13 +214,13 @@ resource "kubernetes_deployment" "nginx" {
     }
   }
 }
-\`\`\`
+```
 
 ### B. LoadBalancer Service
 
 To expose the Nginx application to the internet, we create a Kubernetes Service of type `LoadBalancer`. Azure will automatically provision an Azure Load Balancer and assign a public IP address to it.
 
-\`\`\`terraform
+```terraform
 # workload.tf (continued)
 
 # 2. Kubernetes Service (LoadBalancer) to expose Nginx
@@ -239,7 +239,7 @@ resource "kubernetes_service" "nginx_service" {
     type = "LoadBalancer"
   }
 }
-\`\`\`
+```
 
 ## V. Execution and Validation
 
@@ -248,35 +248,35 @@ resource "kubernetes_service" "nginx_service" {
 Assuming you have authenticated with Azure CLI (`az login`), the deployment process is standard:
 
 1.  **Initialize Terraform:** Downloads providers and initializes the working directory.
-    \`\`\`bash
+    ```bash
     terraform init
-    \`\`\`
+    ```
 2.  **Review the Plan:** Shows all resources that will be created, updated, or destroyed.
-    \`\`\`bash
+    ```bash
     terraform plan
-    \`\`\`
+    ```
 3.  **Apply the Configuration:** Executes the plan, provisioning the infrastructure and deploying the workload.
-    \`\`\`bash
+    ```bash
     terraform apply --auto-approve
-    \`\`\`
+    ```
 
 ### B. Validation
 
 After the apply is complete, you can validate the deployment using `kubectl`. First, retrieve the kubeconfig file:
 
-\`\`\`bash
+```bash
 az aks get-credentials --resource-group rg-aks-terraform-example --name aks-terraform-cluster --overwrite-existing
-\`\`\`
+```
 
 Then, check the status of the deployment and service:
 
-\`\`\`bash
+```bash
 # Check the Nginx pods
 kubectl get pods
 
 # Check the LoadBalancer service and get the External IP
 kubectl get service nginx-service
-\`\`\`
+```
 
 The output of the service command will show the external IP address. Navigating to this IP in a web browser will display the Nginx welcome page, confirming the end-to-end automation was successful.
 
@@ -284,9 +284,9 @@ The output of the service command will show the external IP address. Navigating 
 
 To destroy all resources created by this guide, run:
 
-\`\`\`bash
+```bash
 terraform destroy --auto-approve
-\`\`\`
+```
 
 ## VI. Best Practices and Next Steps
 
