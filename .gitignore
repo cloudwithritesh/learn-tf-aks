@@ -1,0 +1,63 @@
+# Terraform files
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.*
+*.tfstate
+*.tfstate.*.backup
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+*.code-workspace
+.DS_Store
+
+# OS files
+Thumbs.db
+.DS_Store
+*.pem
+*.key
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# kubeconfig files
+kubeconfig
+kubeconfig-*
+.kube/config
+
+# Azure CLI files
+.azure/
+
+# Terraform plan files
+*.tfplan
+tfplan
